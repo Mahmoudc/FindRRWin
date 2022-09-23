@@ -6,6 +6,9 @@
 //
 
 #include <iostream>
+#include <chrono> //For system_clock
+#include <random>
+#include <iomanip>
 using namespace std;
 double getAccountBalance();
 int totalTradesTaken();
@@ -14,26 +17,58 @@ double getLossPercent();
 int getWinningTrades();
 int getLossingTrades();
 double getTotalProfitPercent(double, int, double, int, double, int);
+double randomSimulations(double, int, double, double, int);
 int main(int argc, const char * argv[]) {
     int trades=0, win_rate=0, loss_rate=0;
     double profit_percent=0, loss_percent=0, balance=0;
     double profit=0;
+    int type_program=0;
     // insert code here...
     balance=getAccountBalance();
     trades=totalTradesTaken();
+    cout<<"Select program type\n0-To get risk to reward\n1-To backtest random buys and sells given risk to reward\n";
+    cin>>type_program;
+    
     //The loop starts here
     while(true)
     {
         profit_percent=getProfitPercent();
-        win_rate=getWinningTrades();
+        if(type_program==0)
+            win_rate=getWinningTrades();
         loss_percent=getLossPercent();
-        loss_rate=getLossingTrades();
-        profit=getTotalProfitPercent(balance, trades, profit_percent, win_rate, loss_percent, loss_rate);
-        cout<<"Profit percent: "<<profit<<"%";
-        cout<<endl;
-        double profit_account=(profit/100)*balance;
-        cout<<"\nProfit on account balance $"<<profit_account<<endl;
-        cout<<"\nYour profit share for prop firm account: $"<<profit_account*0.80<<endl;
+        if(type_program==0)
+            loss_rate=getLossingTrades();
+        if(type_program==0)
+        {
+            profit=getTotalProfitPercent(balance, trades, profit_percent, win_rate, loss_percent, loss_rate);
+            cout<<"Profit percent: "<<profit<<"%";
+            cout<<endl;
+            double profit_account=(profit/100)*balance;
+            cout<<"\nProfit on account balance $"<<profit_account<<endl;
+            cout<<"\nYour profit share for prop firm account: $"<<profit_account*0.80<<endl;
+        }
+        else if(type_program==1)
+        {
+            int runs=0;
+            cout<<"Enter how many times you'd like to simulate results: ";
+            cin>>runs;
+            double total_profit=0;
+            double average_profit=0, average_percent=0;
+            for(int i=0;i<runs;i++)
+            {
+                //srand( static_cast<unsigned int>(time(nullptr)));
+                total_profit+=randomSimulations(balance, trades, profit_percent, loss_percent, i+1);
+            }
+            average_percent=total_profit/runs;
+            average_profit=(average_percent/100)*((double)balance);
+            cout<<"\nYour average profit percent is: "<< fixed << setprecision(2)<<average_percent<<"%"<<endl;
+            cout<<"Your average profit on account balance is: $"<< fixed << setprecision(2)<<average_profit<<endl;
+            cout<<"Your average profit share for prop firm account is: $"<< fixed << setprecision(2)<<average_profit*0.80<<endl;
+                
+            //A function to compute the results
+            
+        }
+       
     }
    
     return 0;
@@ -54,7 +89,7 @@ int totalTradesTaken() {
 }
 double getProfitPercent() {
     double profitPercent=0;
-    cout<<"Enter your winning percent rate: ";
+    cout<<"\nEnter your winning percent rate: ";
     cin>>profitPercent;
     cout<<endl;
     return profitPercent;
@@ -90,5 +125,43 @@ double getTotalProfitPercent(double balance, int tradesTaken, double win_percent
         profit+=(win_percent*win_rate)-(loss_percent*loss_rate);//calculates the profit on every cycle
     }
 
+    return profit;
+}
+double randomSimulations(double account_balance, int trades_taken, double profit_percent, double loss_percent, int runs)
+{
+    double profit=0;
+    int win_loss=0;
+    //unsigned seed = time(0);
+    unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+    default_random_engine generator(seed);
+    //uniform_real_distribution<double> distributionDouble(1.0, 10.0); // Set the numbers for double.
+    //0-2 because 3 if position is break even
+    uniform_int_distribution<int> distributionInteger(0, 2);
+    //srand (time(0));
+    for(int i=0;i<trades_taken;i++)
+    {
+        srand(seed);
+        win_loss=distributionInteger(generator);
+        if(win_loss==2)
+        {
+            profit+=0;
+        }
+        else if(win_loss==0)
+        {
+            profit+=profit_percent;
+        }
+        else if(win_loss==1)
+        {
+            profit-=loss_percent;
+        }
+       // cout<<i<<"- "<<win_loss<<endl;
+        //Now random number if 1 means win if 0 means loss will figure out the
+    }
+    //Then display output
+    cout<<runs<<"-Profit percent: "<<profit<<"%";
+    cout<<endl;
+    double profit_account=(profit/100)*account_balance;
+    cout<<"\nProfit on account balance $"<<profit_account<<endl;
+    cout<<"\nYour profit share for prop firm account: $"<<profit_account*0.80<<endl<<endl;
     return profit;
 }
