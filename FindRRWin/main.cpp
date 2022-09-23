@@ -20,7 +20,8 @@ double getTotalProfitPercent(double, int, double, int, double, int);
 double randomSimulations(double, int, double, double, int);
 int main(int argc, const char * argv[]) {
     int trades=0, win_rate=0, loss_rate=0;
-    double profit_percent=0, loss_percent=0, balance=0;
+    double profit_percent=0, loss_percent=0, balance=0, current_profit=0;
+    int wins=0, losses=0, break_even=0;
     double profit=0;
     int type_program=0;
     // insert code here...
@@ -57,11 +58,30 @@ int main(int argc, const char * argv[]) {
             for(int i=0;i<runs;i++)
             {
                 //srand( static_cast<unsigned int>(time(nullptr)));
-                total_profit+=randomSimulations(balance, trades, profit_percent, loss_percent, i+1);
+                current_profit=randomSimulations(balance, trades, profit_percent, loss_percent, i+1);
+                total_profit+=current_profit;
+                if(current_profit>0)
+                {
+                    wins++;
+                }
+                else if(current_profit<0)
+                {
+                    losses++;
+                }
+                else if(current_profit==0)
+                {
+                    break_even++;
+                }
             }
             average_percent=total_profit/runs;
+            //You can find then the lowest value for losses and mention how many wins and losses total for all the months
             average_profit=(average_percent/100)*((double)balance);
-            cout<<"\nYour average profit percent is: "<< fixed << setprecision(2)<<average_percent<<"%"<<endl;
+            cout<<"\nYour total wins is: "<<wins<<endl<<"Your total losses is: "<<losses<<endl;
+            cout<<"Your total break even is: "<<break_even<<endl;
+            wins=0;
+            losses=0;
+            break_even=0;
+            cout<<"Your average profit percent is: "<< fixed << setprecision(2)<<average_percent<<"%"<<endl;
             cout<<"Your average profit on account balance is: $"<< fixed << setprecision(2)<<average_profit<<endl;
             cout<<"Your average profit share for prop firm account is: $"<< fixed << setprecision(2)<<average_profit*0.80<<endl;
                 
@@ -138,6 +158,7 @@ double randomSimulations(double account_balance, int trades_taken, double profit
     //0-2 because 3 if position is break even
     uniform_int_distribution<int> distributionInteger(0, 2);
     //srand (time(0));
+    int wins=0, losses=0, break_even=0;
     for(int i=0;i<trades_taken;i++)
     {
         srand(seed);
@@ -145,23 +166,28 @@ double randomSimulations(double account_balance, int trades_taken, double profit
         if(win_loss==2)
         {
             profit+=0;
+            break_even++;
         }
         else if(win_loss==0)
         {
             profit+=profit_percent;
+            wins++;
         }
         else if(win_loss==1)
         {
             profit-=loss_percent;
+            losses++;
         }
        // cout<<i<<"- "<<win_loss<<endl;
         //Now random number if 1 means win if 0 means loss will figure out the
     }
     //Then display output
-    cout<<runs<<"-Profit percent: "<<profit<<"%";
+    cout<<runs<<"- "<<"Your total wins is: "<<wins<<endl<<"Your total losses is: "<<losses<<endl;
+    cout<<"Your total break even is: "<<break_even<<endl;
+    cout<<"Profit percent: "<<profit<<"%";
     cout<<endl;
     double profit_account=(profit/100)*account_balance;
-    cout<<"\nProfit on account balance $"<<profit_account<<endl;
-    cout<<"\nYour profit share for prop firm account: $"<<profit_account*0.80<<endl<<endl;
+    cout<<"Profit on account balance $"<<profit_account<<endl;
+    cout<<"Your profit share for prop firm account: $"<<profit_account*0.80<<endl<<endl;
     return profit;
 }
