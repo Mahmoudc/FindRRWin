@@ -55,41 +55,76 @@ int main(int argc, const char * argv[]) {
             cin>>runs;
             double total_profit=0;
             double average_profit=0, average_percent=0;
-            for(int i=0;i<runs;i++)
+            bool continues=false;
+            double total_balance=balance;
+            double current_balance=0;
+            int check=0;
+            //Check if the user wants continues or seperate results
+            cout<<"\nWould you like to have continues or seperate results for each month\n1- For seperate months\n2- For continues\n";
+            cin>>check;
+            check==1 ? continues=false : continues=true;
+            
+                //int temp_balance=balance;
+                for(int i=0;i<runs;i++)
+                {
+                    //srand( static_cast<unsigned int>(time(nullptr)));
+                    total_profit+=current_profit;
+                    if(!continues)
+                    {
+                        current_profit=randomSimulations(balance, trades, profit_percent, loss_percent, i+1);
+                        if(current_profit>0)
+                        {
+                            wins++;
+                        }
+                        else if(current_profit<0)
+                        {
+                            losses++;
+                        }
+                        else if(current_profit==0)
+                        {
+                            break_even++;
+                        }
+                    }
+                    if(continues)
+                    {
+                        current_profit=randomSimulations(total_balance, trades, profit_percent, loss_percent, i+1);
+                        current_balance=(current_profit/100)*total_balance;
+                        total_balance+=(total_profit/100)+current_balance;
+                        
+                    
+                    }
+                       
+            
+                }
+            if(!continues)
             {
-                //srand( static_cast<unsigned int>(time(nullptr)));
-                current_profit=randomSimulations(balance, trades, profit_percent, loss_percent, i+1);
-                total_profit+=current_profit;
-                if(current_profit>0)
-                {
-                    wins++;
-                }
-                else if(current_profit<0)
-                {
-                    losses++;
-                }
-                else if(current_profit==0)
-                {
-                    break_even++;
-                }
+                average_percent=total_profit/runs;
+                //You can find then the lowest value for losses and mention how many wins and losses total for all the months
+                average_profit=(average_percent/100)*((double)balance);
+                cout<<"\nYour total wins is: "<<wins<<endl<<"Your total losses is: "<<losses<<endl;
+                cout<<"Your total break even is: "<<break_even<<endl;
+                wins=0;
+                losses=0;
+                break_even=0;
+                cout<<"Your average profit percent is: "<< fixed << setprecision(2)<<average_percent<<"%"<<endl;
+                cout<<"Your average profit on account balance is: $"<< fixed << setprecision(2)<<average_profit<<endl;
+                cout<<"Your average profit share for prop firm account is: $"<< fixed << setprecision(2)<<average_profit*0.80<<endl;
             }
-            average_percent=total_profit/runs;
-            //You can find then the lowest value for losses and mention how many wins and losses total for all the months
-            average_profit=(average_percent/100)*((double)balance);
-            cout<<"\nYour total wins is: "<<wins<<endl<<"Your total losses is: "<<losses<<endl;
-            cout<<"Your total break even is: "<<break_even<<endl;
-            wins=0;
-            losses=0;
-            break_even=0;
-            cout<<"Your average profit percent is: "<< fixed << setprecision(2)<<average_percent<<"%"<<endl;
-            cout<<"Your average profit on account balance is: $"<< fixed << setprecision(2)<<average_profit<<endl;
-            cout<<"Your average profit share for prop firm account is: $"<< fixed << setprecision(2)<<average_profit*0.80<<endl;
+            else if(continues)
+            {
+                cout<<"Your total profit percent is: "<< fixed << setprecision(2)<<total_profit<<"%"<<endl;
+                cout<<"Your total profit balance is: $"<< fixed << setprecision(2)<<total_balance<<endl;
+                cout<<"Your profit share for prop firm account is: $"<< fixed <<setprecision(2)<<(total_balance-balance)*0.80<<endl;
+                total_balance=0;
+                current_balance=0;
+            }
+            }
+          
                 
             //A function to compute the results
             
         }
        
-    }
    
     return 0;
 }
@@ -187,7 +222,8 @@ double randomSimulations(double account_balance, int trades_taken, double profit
     cout<<"Profit percent: "<<profit<<"%";
     cout<<endl;
     double profit_account=(profit/100)*account_balance;
-    cout<<"Profit on account balance $"<<profit_account<<endl;
-    cout<<"Your profit share for prop firm account: $"<<profit_account*0.80<<endl<<endl;
+    cout<<"Account balance $"<<fixed<<setprecision(2)<<account_balance+profit_account<<endl;
+    cout<<"Profit on account balance $"<<fixed<<setprecision(2)<<profit_account<<endl;
+    cout<<"Your profit share for prop firm account: $"<<fixed<<setprecision(2)<<profit_account*0.80<<endl<<endl;
     return profit;
 }
